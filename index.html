@@ -1,248 +1,276 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>DTF Studio</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="DTF Studio - Plataforma creativa para impresión DTF">
+<meta charset="UTF-8">
+<title>DTF Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #0f0f0f;
-            color: #f5f5f5;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            background: #111;
-            border-bottom: 1px solid #222;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 20px;
-        }
-        nav a {
-            margin-left: 20px;
-            color: #ccc;
-            text-decoration: none;
-        }
-        nav a:hover {
-            color: #fff;
-        }
-        .hidden { display: none; }
+<style>
+:root{
+  --bg:#1e1e1e;
+  --panel:#252526;
+  --border:#333;
+  --text:#eaeaea;
+  --muted:#999;
+  --accent:#3a86ff;
+}
 
-        .container {
-            padding: 40px;
-        }
+*{box-sizing:border-box}
 
-        button {
-            background: #222;
-            color: #fff;
-            border: 1px solid #333;
-            padding: 10px 15px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #333;
-        }
+body{
+  margin:0;
+  font-family:Segoe UI, Inter, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+}
 
-        input, textarea, select {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            background: #111;
-            border: 1px solid #333;
-            color: #fff;
-        }
+/* TOP BAR */
+.topbar{
+  height:40px;
+  background:#2d2d30;
+  display:flex;
+  align-items:center;
+  padding:0 15px;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+}
 
-        .auth-box {
-            max-width: 400px;
-            margin: 100px auto;
-            background: #111;
-            padding: 30px;
-            border: 1px solid #222;
-        }
+/* MAIN */
+.app{
+  display:grid;
+  grid-template-columns:60px 1fr 260px;
+  height:calc(100vh - 40px);
+}
 
-        .section {
-            margin-bottom: 60px;
-        }
+/* TOOLS */
+.tools{
+  background:var(--panel);
+  border-right:1px solid var(--border);
+}
 
-        .editor-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 20px;
-        }
+.tool{
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border-bottom:1px solid #2a2a2a;
+  font-size:18px;
+}
 
-        .tools {
-            background: #111;
-            padding: 20px;
-            border: 1px solid #222;
-        }
+.tool.active{
+  background:var(--accent);
+  color:#000;
+}
 
-        .canvas-area {
-            background: #111;
-            border: 1px dashed #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-        }
+/* WORKSPACE */
+.workspace{
+  background:#1b1b1b;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-        .history ul {
-            list-style: none;
-            padding: 0;
-        }
+canvas{
+  background:#fff;
+  border:1px solid #444;
+}
 
-        .history li {
-            padding: 10px;
-            border-bottom: 1px solid #222;
-        }
-    </style>
+/* PANEL */
+.panel{
+  background:var(--panel);
+  border-left:1px solid var(--border);
+  padding:15px;
+  font-size:13px;
+}
+
+.layer{
+  padding:8px;
+  border:1px solid var(--border);
+  margin-bottom:5px;
+  cursor:pointer;
+}
+
+.layer.active{
+  background:#333;
+}
+
+input[type=range], input[type=file]{
+  width:100%;
+}
+</style>
 </head>
+
 <body>
 
-<!-- LOGIN -->
-<div id="loginView" class="auth-box hidden">
-    <h2>DTF Studio</h2>
-    <p>Accedé a tu estudio creativo</p>
-
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Contraseña">
-
-    <button onclick="login()">Ingresar</button>
+<!-- TOP BAR -->
+<div class="topbar">
+  DTF Studio · Editor Profesional
 </div>
 
-<!-- APP -->
-<div id="appView" class="hidden">
+<div class="app">
 
-<header>
-    <h1>DTF Studio</h1>
-    <nav>
-        <a href="#editor">Editor</a>
-        <a href="#ia">IA</a>
-        <a href="#historial">Historial</a>
-        <a href="#exportar">Exportar</a>
-        <a href="#" onclick="logout()">Salir</a>
-    </nav>
-</header>
+  <!-- TOOLS -->
+  <div class="tools">
+    <div class="tool active" id="moveTool" title="Mover">🡄</div>
+    <div class="tool" id="eraseTool" title="Borrar fondo">🧽</div>
+  </div>
 
-<div class="container">
+  <!-- WORKSPACE -->
+  <div class="workspace">
+    <canvas id="canvas" width="900" height="550"></canvas>
+  </div>
 
-    <!-- EDITOR -->
-    <section id="editor" class="section">
-        <h2>Editor de Imagen</h2>
-        <div class="editor-layout">
-            <div class="tools">
-                <button onclick="saveProject('Eliminar fondo')">Eliminar fondo</button>
-                <button onclick="saveProject('Mejorar calidad')">Mejorar calidad</button>
-                <hr>
-                <button onclick="saveProject('Semitono blanca')">Semitono blanca</button>
-                <button onclick="saveProject('Semitono negra')">Semitono negra</button>
-            </div>
-            <div class="canvas-area">
-                <p>Área de trabajo / Canvas</p>
-            </div>
-        </div>
-    </section>
+  <!-- PANEL -->
+  <div class="panel">
+    <h3>Archivos</h3>
+    <input type="file" id="upload" accept="image/*" multiple>
 
-    <!-- IA -->
-    <section id="ia" class="section">
-        <h2>IA Studio</h2>
+    <h3>Capas</h3>
+    <div id="layers"></div>
 
-        <h3>Personas reales</h3>
-        <textarea placeholder="Ej: retrato realista, luz de estudio, fondo blanco"></textarea>
-        <button onclick="saveProject('IA Persona real')">Generar</button>
+    <h3>Pincel borrador</h3>
+    <label>Tamaño</label>
+    <input type="range" id="brushSize" min="5" max="80" value="25">
 
-        <h3 style="margin-top:30px;">Ilustraciones / Dibujos</h3>
-        <textarea placeholder="Ej: ilustración tattoo monocromática"></textarea>
-        <button onclick="saveProject('IA Ilustración')">Generar</button>
-    </section>
+    <h3>Opacidad</h3>
+    <input type="range" id="opacity" min="0" max="100" value="100">
+  </div>
 
-    <!-- HISTORIAL -->
-    <section id="historial" class="section history">
-        <h2>Historial del usuario</h2>
-        <ul id="historyList"></ul>
-    </section>
-
-    <!-- EXPORTAR -->
-    <section id="exportar" class="section">
-        <h2>Exportar para DTF</h2>
-        <select>
-            <option>PNG transparente – 300 DPI</option>
-            <option>TIFF – 600 DPI</option>
-        </select>
-        <button onclick="saveProject('Exportación DTF')">Exportar</button>
-    </section>
-
-</div>
 </div>
 
 <script>
-    const loginView = document.getElementById("loginView");
-    const appView = document.getElementById("appView");
-    const historyList = document.getElementById("historyList");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const layersDiv = document.getElementById("layers");
 
-    function login() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+let layers = [];
+let activeLayer = null;
+let mode = "move";
+let dragging = false;
+let erasing = false;
+let offsetX = 0;
+let offsetY = 0;
 
-        if (!email || !password) {
-            alert("Completa los datos");
-            return;
-        }
+// Tools
+document.getElementById("moveTool").onclick = ()=>setTool("move");
+document.getElementById("eraseTool").onclick = ()=>setTool("erase");
 
-        localStorage.setItem("dtf_user", email);
-        showApp();
-    }
+function setTool(tool){
+  mode = tool;
+  document.querySelectorAll(".tool").forEach(t=>t.classList.remove("active"));
+  document.getElementById(tool+"Tool").classList.add("active");
+}
 
-    function logout() {
-        localStorage.removeItem("dtf_user");
-        location.reload();
-    }
+// Upload images
+document.getElementById("upload").addEventListener("change", e=>{
+  [...e.target.files].forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const layerCanvas = document.createElement("canvas");
+        layerCanvas.width = img.width;
+        layerCanvas.height = img.height;
+        layerCanvas.getContext("2d").drawImage(img,0,0);
 
-    function showApp() {
-        loginView.classList.add("hidden");
-        appView.classList.remove("hidden");
-        loadHistory();
-    }
+        const layer = {
+          canvas: layerCanvas,
+          x:(canvas.width-img.width)/2,
+          y:(canvas.height-img.height)/2,
+          opacity:1
+        };
 
-    function showLogin() {
-        loginView.classList.remove("hidden");
-        appView.classList.add("hidden");
-    }
+        layers.push(layer);
+        activeLayer = layer;
+        updateLayers();
+        draw();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+});
 
-    function saveProject(name) {
-        let history = JSON.parse(localStorage.getItem("dtf_history")) || [];
-        history.push({
-            name,
-            date: new Date().toLocaleString()
-        });
-        localStorage.setItem("dtf_history", JSON.stringify(history));
-        loadHistory();
-    }
+// Draw
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  layers.forEach(l=>{
+    ctx.globalAlpha = l.opacity;
+    ctx.drawImage(l.canvas,l.x,l.y);
+  });
+  ctx.globalAlpha = 1;
+}
 
-    function loadHistory() {
-        let history = JSON.parse(localStorage.getItem("dtf_history")) || [];
-        historyList.innerHTML = "";
-        history.forEach(item => {
-            const li = document.createElement("li");
-            li.textContent = `${item.name} — ${item.date}`;
-            historyList.appendChild(li);
-        });
-    }
+// Layers UI
+function updateLayers(){
+  layersDiv.innerHTML = "";
+  layers.slice().reverse().forEach(l=>{
+    const div = document.createElement("div");
+    div.className = "layer"+(l===activeLayer?" active":"");
+    div.textContent = "Capa";
+    div.onclick = ()=>{
+      activeLayer = l;
+      document.getElementById("opacity").value = l.opacity*100;
+      updateLayers();
+    };
+    layersDiv.appendChild(div);
+  });
+}
 
-    // INIT
-    if (localStorage.getItem("dtf_user")) {
-        showApp();
-    } else {
-        showLogin();
-    }
+// Mouse events
+canvas.addEventListener("mousedown", e=>{
+  if(!activeLayer) return;
+
+  if(mode==="move"){
+    dragging = true;
+    offsetX = e.offsetX - activeLayer.x;
+    offsetY = e.offsetY - activeLayer.y;
+  }
+
+  if(mode==="erase"){
+    erasing = true;
+    erase(e);
+  }
+});
+
+canvas.addEventListener("mouseup", ()=>{ dragging=false; erasing=false; });
+canvas.addEventListener("mouseleave", ()=>{ dragging=false; erasing=false; });
+
+canvas.addEventListener("mousemove", e=>{
+  if(dragging && mode==="move"){
+    activeLayer.x = e.offsetX - offsetX;
+    activeLayer.y = e.offsetY - offsetY;
+    draw();
+  }
+  if(erasing && mode==="erase"){
+    erase(e);
+  }
+});
+
+// Erase function
+function erase(e){
+  const size = document.getElementById("brushSize").value;
+  const x = e.offsetX - activeLayer.x;
+  const y = e.offsetY - activeLayer.y;
+  const c = activeLayer.canvas.getContext("2d");
+
+  c.globalCompositeOperation = "destination-out";
+  c.beginPath();
+  c.arc(x,y,size,0,Math.PI*2);
+  c.fill();
+  c.globalCompositeOperation = "source-over";
+  draw();
+}
+
+// Opacity
+document.getElementById("opacity").addEventListener("input", e=>{
+  if(!activeLayer) return;
+  activeLayer.opacity = e.target.value/100;
+  draw();
+});
 </script>
 
 </body>
 </html>
-
